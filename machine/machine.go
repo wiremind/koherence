@@ -6,6 +6,7 @@ import (
 
 type MachineInfos struct {
 	Uuid          uuid.UUID
+	Hostname      string
 	SysVendor     string
 	ChassisVendor string
 }

@@ -12,8 +12,9 @@ import (
 )
 
 const (
-	dmiInfosDir = "/sys/devices/virtual/dmi/id/"
-	dmiUuid     = dmiInfosDir + "product_uuid"
+	hostnamePath = "/etc/hostname"
+	dmiInfosDir  = "/sys/devices/virtual/dmi/id/"
+	dmiUuid      = dmiInfosDir + "product_uuid"
 	/*
 	 * For Openstack should return:
 	 *
@@ -52,11 +53,16 @@ func readFsPath(path string) ([]byte, error) {
 // ReadFsInfos reads machine infos directly from its pseudo-fs and return it in
 // MachineInfos struct.
 func ReadFsInfos() (*MachineInfos, error) {
+	var hostname []byte
 	var uuidBytes []byte
 	var uuidT uuid.UUID
 	var sysVendor []byte
 	var chassisVendor []byte
 	var err error
+
+	if hostname, err = readFsPath(hostnamePath); err != nil {
+		return nil, err
+	}
 
 	if uuidBytes, err = readFsPath(dmiUuid); err != nil {
 		return nil, err
@@ -81,6 +87,7 @@ func ReadFsInfos() (*MachineInfos, error) {
 
 	return &MachineInfos{
 		Uuid:          uuidT,
+		Hostname:      string(hostname),
 		SysVendor:     string(sysVendor),
 		ChassisVendor: string(chassisVendor),
 	}, nil
