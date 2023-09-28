@@ -50,6 +50,21 @@ func readFsPath(path string) ([]byte, error) {
 	return bytes.TrimSpace(buf), nil
 }
 
+// TODO improves this version, maybe check refcnt too ?
+func getBSType() string {
+	ret := "None"
+
+	if _, err := os.Stat("/sys/module/sd_mod"); !os.IsNotExist(err) {
+		ret = BsSCSI
+	}
+
+	if _, err := os.Stat("/sys/module/virtio_blk"); !os.IsNotExist(err) {
+		ret = BsVirtioBlk
+	}
+
+	return ret
+}
+
 // ReadFsInfos reads machine infos directly from its pseudo-fs and return it in
 // MachineInfos struct.
 func ReadFsInfos() (*MachineInfos, error) {
@@ -86,9 +101,10 @@ func ReadFsInfos() (*MachineInfos, error) {
 	}
 
 	return &MachineInfos{
-		Uuid:          uuidT,
-		Hostname:      string(hostname),
-		SysVendor:     string(sysVendor),
-		ChassisVendor: string(chassisVendor),
+		Uuid:             uuidT,
+		Hostname:         string(hostname),
+		SysVendor:        string(sysVendor),
+		ChassisVendor:    string(chassisVendor),
+		BlockStorageType: getBSType(),
 	}, nil
 }

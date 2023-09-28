@@ -101,7 +101,8 @@ func ReadOpenstackInfos() (*MachineInfos, error) {
 		Uuid:     metadatas.Uuid,
 		Hostname: metadatas.Hostname,
 		// TODO just leave empty ?
-		SysVendor:     "OpenStack Foundation",
-		ChassisVendor: "QEMU",
+		SysVendor:        ProviderOpenstack,
+		ChassisVendor:    "QEMU",
+		BlockStorageType: "None",
 	}, nil
 }
