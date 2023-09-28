@@ -34,6 +34,10 @@ func info(clicontext *cli.Context) error {
 		if infos, err = machine.ReadFsInfos(); err != nil {
 			return err
 		}
+	case "openstack":
+		if infos, err = machine.ReadOpenstackInfos(); err != nil {
+			return err
+		}
 	default:
 		slog.Error("This infos type is not supported")
 		return nil
