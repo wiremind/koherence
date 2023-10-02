@@ -8,6 +8,8 @@ import (
 	"bytes"
 	"log/slog"
 	"os"
+	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -17,6 +19,7 @@ import (
 
 const (
 	udevData = "/run/udev/data/"
+	sysBlock = "/sys/block/"
 )
 
 func commonDeviceSize(pseudoFsDevPath string) int {
@@ -132,11 +135,11 @@ func virtioBlkDeviceUuid(blockDev string) (uuid.UUID, error) {
 	return devUuid, nil
 }
 
-func VirtioBlkDeviceInfos(device string) (*BlockStorageInfos, error) {
+func virtioBlkDeviceInfos(device string) (*BlockStorageInfos, error) {
 	var infos BlockStorageInfos
 	var err error
 
-	pseudoFsDevPath := "/sys/block/" + device
+	pseudoFsDevPath := sysBlock + device
 
 	// Check if device OK
 	if _, err = os.Stat(pseudoFsDevPath); os.IsNotExist(err) {
@@ -245,11 +248,11 @@ func scsiDeviceUuid(blockDev string) (uuid.UUID, error) {
 	return devUuid, nil
 }
 
-func ScsiDeviceInfos(device string) (*BlockStorageInfos, error) {
+func scsiDeviceInfos(device string) (*BlockStorageInfos, error) {
 	var infos BlockStorageInfos
 	var err error
 
-	pseudoFsDevPath := "/sys/block/" + device
+	pseudoFsDevPath := sysBlock + device
 
 	// Check if device OK
 	if _, err = os.Stat(pseudoFsDevPath); os.IsNotExist(err) {
@@ -287,22 +290,63 @@ func ScsiDeviceInfos(device string) (*BlockStorageInfos, error) {
 	return &infos, nil
 }
 
-//func extractBsInfos(machineInfos *machine.MachineInfos) (*BlockStorageInfos, error) {
-//	var infos *BlockStorageInfos
-//	var err error
-//
-//	switch machineInfos.BlockStorageType {
-//	case machine.BsSCSI:
-//		infos, err = extractSCSIInfos()
-//	case machine.BsVirtioBlk:
-//		infos, err = extractVirtioBlkInfos()
-//	default:
-//		slog.Error(
-//			"Do not support this block-storage type.",
-//			slog.String("type", machineInfos.BlockStorageType),
-//		)
-//		// TODO do better
-//		panic("extractBsInfos")
-//	}
-//	return infos, nil
-//}
+func listDevices(bsType string) []string {
+	var re *regexp.Regexp
+
+	files := []string{}
+
+	switch bsType {
+	case machine.BsSCSI:
+		re = regexp.MustCompile("sd[a-z]+")
+	case machine.BsVirtioBlk:
+		re = regexp.MustCompile("vd[a-z]")
+	default:
+		return files
+	}
+
+	walk := func(fn string, fi os.FileInfo, err error) error {
+		if re.MatchString(fn) == false {
+			return nil
+		}
+
+		basename := filepath.Base(fn)
+		files = append(files, basename)
+
+		return nil
+	}
+
+	filepath.Walk(sysBlock, walk)
+
+	return files
+}
+
+// TODO maybe get block-storage type directly without check instead of this
+// double check machine/bs ?
+func ExtractBsInfos(bsType string) []*BlockStorageInfos {
+	var fn func(string) (*BlockStorageInfos, error)
+
+	infos := []*BlockStorageInfos{}
+	devices := listDevices(bsType)
+
+	switch bsType {
+	case machine.BsSCSI:
+		fn = scsiDeviceInfos
+	case machine.BsVirtioBlk:
+		fn = virtioBlkDeviceInfos
+	default:
+		// TODO do better
+		panic("ExtractBsInfos")
+	}
+
+	for _, dev := range devices {
+		i, err := fn(dev)
+		if err != nil {
+			// TODO do better
+			panic("aaahh")
+		}
+
+		infos = append(infos, i)
+	}
+
+	return infos
+}

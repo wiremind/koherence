@@ -20,34 +20,14 @@ var BlockStorageCommand = cli.Command{
 			Usage:    "Read infos from specified type",
 			Required: true,
 		},
-		cli.StringFlag{
-			Name:     "name",
-			Usage:    "Device name to check",
-			Required: true,
-		},
 	},
 }
 
 func debugBs(clicontext *cli.Context) error {
-	var infos *bs.BlockStorageInfos
 	var err error
 
 	infosType := clicontext.String("type")
-	devName := clicontext.String("name")
-
-	switch infosType = clicontext.String("type"); infosType {
-	case "scsi":
-		if infos, err = bs.ScsiDeviceInfos(devName); err != nil {
-			return err
-		}
-	case "virtio-blk":
-		if infos, err = bs.VirtioBlkDeviceInfos(devName); err != nil {
-			return err
-		}
-	default:
-		slog.Error("This infos type is not supported")
-		return nil
-	}
+	infos := bs.ExtractBsInfos(infosType)
 
 	b, err := json.Marshal(infos)
 	if err != nil {
