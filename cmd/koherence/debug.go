@@ -10,5 +10,6 @@ var debugCommand = cli.Command{
 	Usage: "debug utilities",
 	Subcommands: []cli.Command{
 		debug.MachineCommand,
+		debug.BlockStorageCommand,
 	},
 }

@@ -10,7 +10,7 @@ import (
 var MachineCommand = cli.Command{
 	Name:   "machine",
 	Usage:  "display machine information",
-	Action: info,
+	Action: debugMachine,
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "type",
@@ -24,7 +24,7 @@ var MachineCommand = cli.Command{
 	},
 }
 
-func info(clicontext *cli.Context) error {
+func debugMachine(clicontext *cli.Context) error {
 	var infosType string
 	var infos *machine.MachineInfos
 	var err error
