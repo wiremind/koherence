@@ -1,7 +1,10 @@
 package debug
 
 import (
+	"encoding/json"
+	"fmt"
 	"log/slog"
+	"os"
 
 	"github.com/urfave/cli"
 	"github.com/wiremind/koherence/bs"
@@ -46,12 +49,13 @@ func debugBs(clicontext *cli.Context) error {
 		return nil
 	}
 
-	slog.Info(
-		"Fetched infos",
-		slog.String("type", infosType),
-		slog.String("struct", "BlockStorageInfos"),
-		slog.Any("infos", *infos),
-	)
+	b, err := json.Marshal(infos)
+	if err != nil {
+		slog.Error("Cannot encode in JSON")
+		return err
+	}
+
+	fmt.Fprintln(os.Stdout, string(b))
 
 	return nil
 }
