@@ -37,6 +37,10 @@ func debugBs(clicontext *cli.Context) error {
 		if infos, err = bs.ScsiDeviceInfos(devName); err != nil {
 			return err
 		}
+	case "virtio-blk":
+		if infos, err = bs.VirtioBlkDeviceInfos(devName); err != nil {
+			return err
+		}
 	default:
 		slog.Error("This infos type is not supported")
 		return nil
