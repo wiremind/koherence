@@ -11,7 +11,7 @@ type BlockStorageInfos struct {
 	Size      uint              `json:"size"`
 	Device    string            `json:"device"`
 	Type      string            `json:"type"`
-	blockDev  string            `json:"block_dev"`
+	BlockDev  string            `json:"block_dev"`
 	Status    string            `json:"status"`
 	Metadata  map[string]string `json:"metadata"`
 }

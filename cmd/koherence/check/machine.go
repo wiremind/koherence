@@ -10,30 +10,43 @@ import (
 var MachineCommand = cli.Command{
 	Name:   "machine",
 	Usage:  "check machine informations",
-	Action: machineChecker,
+	Action: machineCheckerCommand,
 	Flags:  []cli.Flag{},
 }
 
-func machineChecker(clicontext *cli.Context) error {
+func machineCheckerCommand(clicontext *cli.Context) error {
+	_, err := MachineChecker()
+	if err != nil {
+		slog.Error(
+			"Could not check machine infos.",
+			slog.String("error", err.Error()),
+		)
+		return err
+	}
+
+	return nil
+}
+
+func MachineChecker() (*machine.MachineInfos, error) {
 	var infosFs *machine.MachineInfos
 	var infosProvider *machine.MachineInfos
 	var err error
 
 	if infosFs, err = machine.ReadFsInfos(); err != nil {
-		return err
+		return nil, err
 	}
 
 	switch infosFs.SysVendor {
-	case "OpenStack Foundation":
+	case machine.ProviderOpenstack:
 		if infosProvider, err = machine.ReadOpenstackInfos(); err != nil {
-			return err
+			return nil, err
 		}
 	default:
 		slog.Error(
 			"This provider is not supported.",
 			slog.String("provider", infosFs.SysVendor),
 		)
-		return nil
+		panic("provider not supported")
 	}
 
 	if infosFs.Uuid != infosProvider.Uuid || infosFs.Hostname != infosProvider.Hostname {
@@ -42,12 +55,8 @@ func machineChecker(clicontext *cli.Context) error {
 			slog.Any("fs", *infosFs),
 			slog.Any("provider", *infosProvider),
 		)
-	} else {
-		slog.Info(
-			"Machine informations OK.",
-			slog.Any("infos", *infosFs),
-		)
+		panic("Machine informations mismatch.")
 	}
 
-	return nil
+	return infosFs, nil
 }

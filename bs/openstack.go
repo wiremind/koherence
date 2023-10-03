@@ -127,7 +127,7 @@ func OpenstackGetBlockStorage(machineUuid uuid.UUID) (map[uuid.UUID]*BlockStorag
 			Size:      uint(vol.Size),
 			Device:    device,
 			Type:      machine.BsUnknown,
-			blockDev:  "unknown",
+			BlockDev:  "unknown",
 			Status:    vol.Status,
 			Metadata:  vol.Metadata,
 		}

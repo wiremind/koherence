@@ -10,5 +10,6 @@ var checkCommand = cli.Command{
 	Usage: "check utilities",
 	Subcommands: []cli.Command{
 		check.MachineCommand,
+		check.BlockStorageCommand,
 	},
 }

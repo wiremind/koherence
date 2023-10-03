@@ -8,26 +8,24 @@ import (
 
 	"github.com/urfave/cli"
 	"github.com/wiremind/koherence/bs"
+	"github.com/wiremind/koherence/machine"
 )
 
 var BlockStorageCommand = cli.Command{
 	Name:   "bs",
-	Usage:  "display block-storage information",
+	Usage:  "display block-storage information from filesystem",
 	Action: debugBs,
-	Flags: []cli.Flag{
-		cli.StringFlag{
-			Name:     "type",
-			Usage:    "Read infos from specified type",
-			Required: true,
-		},
-	},
 }
 
 func debugBs(clicontext *cli.Context) error {
 	var err error
 
-	infosType := clicontext.String("type")
-	infos := bs.ExtractBsInfos(infosType)
+	machineInfos, err := machine.ReadFsInfos()
+	if err != nil {
+		return err
+	}
+
+	infos := bs.ExtractBsInfos(machineInfos)
 
 	b, err := json.Marshal(infos)
 	if err != nil {

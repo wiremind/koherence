@@ -13,7 +13,8 @@ const (
 
 // Provider Enum
 const (
-	ProviderOpenstack string = "OpenStack Foundation"
+	ProviderUnknown   string = "Unknown"
+	ProviderOpenstack        = "OpenStack Foundation"
 )
 
 type MachineInfos struct {

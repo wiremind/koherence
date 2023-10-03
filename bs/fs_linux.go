@@ -164,9 +164,9 @@ func virtioBlkDeviceInfos(device string) (*BlockStorageInfos, error) {
 		// TODO less panicky
 		panic("VirtioBlkDeviceInfos")
 	}
-	infos.blockDev = string(blockDev)
+	infos.BlockDev = string(blockDev)
 
-	devUuid, err := virtioBlkDeviceUuid(infos.blockDev)
+	devUuid, err := virtioBlkDeviceUuid(infos.BlockDev)
 	if err != nil {
 		// TODO less panicky
 		panic("VirtioBlkDeviceInfos")
@@ -277,9 +277,9 @@ func scsiDeviceInfos(device string) (*BlockStorageInfos, error) {
 		// TODO less panicky
 		panic("ScsiDeviceInfos")
 	}
-	infos.blockDev = string(blockDev)
+	infos.BlockDev = string(blockDev)
 
-	devUuid, err := scsiDeviceUuid(infos.blockDev)
+	devUuid, err := scsiDeviceUuid(infos.BlockDev)
 	if err != nil {
 		// TODO less panicky
 		panic("ScsiDeviceInfos")
@@ -322,13 +322,13 @@ func listDevices(bsType string) []string {
 
 // TODO maybe get block-storage type directly without check instead of this
 // double check machine/bs ?
-func ExtractBsInfos(bsType string) map[uuid.UUID]*BlockStorageInfos {
+func ExtractBsInfos(m *machine.MachineInfos) map[uuid.UUID]*BlockStorageInfos {
 	var fn func(string) (*BlockStorageInfos, error)
 
 	infos := map[uuid.UUID]*BlockStorageInfos{}
-	devices := listDevices(bsType)
+	devices := listDevices(m.BlockStorageType)
 
-	switch bsType {
+	switch m.BlockStorageType {
 	case machine.BsSCSI:
 		fn = scsiDeviceInfos
 	case machine.BsVirtioBlk:
@@ -345,6 +345,8 @@ func ExtractBsInfos(bsType string) map[uuid.UUID]*BlockStorageInfos {
 			panic("aaahh")
 		}
 
+		// Add machine UUID
+		i.MachineId = m.Uuid
 		infos[i.Uuid] = i
 	}
 
