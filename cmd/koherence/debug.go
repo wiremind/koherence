@@ -11,5 +11,6 @@ var debugCommand = cli.Command{
 	Subcommands: []cli.Command{
 		debug.MachineCommand,
 		debug.BlockStorageCommand,
+		debug.OpenstackCommand,
 	},
 }

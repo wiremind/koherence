@@ -6,7 +6,8 @@ import (
 
 // Block Storage type enum
 const (
-	BsSCSI      string = "scsi"
+	BsUnknown   string = "unknown"
+	BsSCSI             = "scsi"
 	BsVirtioBlk        = "virtio_blk"
 )
 
@@ -16,9 +17,9 @@ const (
 )
 
 type MachineInfos struct {
-	Uuid             uuid.UUID
-	Hostname         string
-	SysVendor        string
-	ChassisVendor    string
-	BlockStorageType string
+	Uuid             uuid.UUID `json:"uuid"`
+	Hostname         string    `json:"hostname"`
+	SysVendor        string    `json:"sys_vendor"`
+	ChassisVendor    string    `json:"chassis_vendor"`
+	BlockStorageType string    `json:"block_storage_type"`
 }
