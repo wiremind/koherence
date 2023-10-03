@@ -322,10 +322,10 @@ func listDevices(bsType string) []string {
 
 // TODO maybe get block-storage type directly without check instead of this
 // double check machine/bs ?
-func ExtractBsInfos(bsType string) []*BlockStorageInfos {
+func ExtractBsInfos(bsType string) map[uuid.UUID]*BlockStorageInfos {
 	var fn func(string) (*BlockStorageInfos, error)
 
-	infos := []*BlockStorageInfos{}
+	infos := map[uuid.UUID]*BlockStorageInfos{}
 	devices := listDevices(bsType)
 
 	switch bsType {
@@ -345,7 +345,7 @@ func ExtractBsInfos(bsType string) []*BlockStorageInfos {
 			panic("aaahh")
 		}
 
-		infos = append(infos, i)
+		infos[i.Uuid] = i
 	}
 
 	return infos
