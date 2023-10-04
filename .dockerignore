@@ -1,0 +1,8 @@
+.git*
+koherence
+.dockerignore
+Dockerfile*
+Containerfile*
+docker-compose.yml
+.gitlab-ci.yml
+.gitignore

@@ -3,7 +3,7 @@ BINARY_NAME=koherence
 KOHERENCE_FILES=$(shell find ${PWD} -type f -name "*.go")
 
 # Control if static or dynamically linked (static by default)
-CGO_ENABLED?=0
+export CGO_ENABLED:=0
 
 .PHONY: build
 build: ${BINARY_NAME}
