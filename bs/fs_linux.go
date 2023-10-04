@@ -124,7 +124,7 @@ func virtioBlkDeviceUuid(blockDev string) (uuid.UUID, error) {
 
 		if strings.HasPrefix(s, "E:ID_SERIAL=") {
 			split := strings.Split(s, "=")
-			// XXX virtio-blk driver truncate serial (20bits instead of 36), we
+			// XXX virtio-blk driver truncate serial (20bytes instead of 36), we
 			// just add 0 for now... We will get the full uuid via the provider
 			// (partial-uuid check + size)
 			if devUuid, err = uuid.Parse(split[1] + "000-000000000000"); err != nil {

@@ -6,9 +6,9 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/google/uuid"
 	"github.com/urfave/cli"
 	"github.com/wiremind/koherence/bs"
+	"github.com/wiremind/koherence/machine"
 )
 
 var OpenstackCommand = cli.Command{
@@ -18,9 +18,12 @@ var OpenstackCommand = cli.Command{
 }
 
 func debugOpenstack(clicontext *cli.Context) error {
-	machine := uuid.Nil
+	infos, err := machine.ReadFsInfos()
+	if err != nil {
+		return err
+	}
 
-	bs, err := bs.OpenstackGetBlockStorage(machine)
+	bs, err := bs.OpenstackGetBlockStorage(infos)
 	if err != nil {
 		return err
 	}

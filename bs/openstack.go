@@ -49,7 +49,7 @@ func openstackVolumesServiceAuth() (*gophercloud.ServiceClient, error) {
 	return client, nil
 }
 
-func OpenstackGetBlockStorage(machineUuid uuid.UUID) (map[uuid.UUID]*BlockStorageInfos, error) {
+func OpenstackGetBlockStorage(machineInfos *machine.MachineInfos) (map[uuid.UUID]*BlockStorageInfos, error) {
 	var openstackMachineUuid uuid.UUID
 	var device string
 	var err error
@@ -106,6 +106,7 @@ func OpenstackGetBlockStorage(machineUuid uuid.UUID) (map[uuid.UUID]*BlockStorag
 			)
 			return nil, err
 		}
+		realUuid := volUuid
 
 		if len(vol.Attachments) == 0 {
 			openstackMachineUuid = uuid.Nil
@@ -124,9 +125,24 @@ func OpenstackGetBlockStorage(machineUuid uuid.UUID) (map[uuid.UUID]*BlockStorag
 			}
 		}
 
+		// Virtio-blk driver truncates block-storage UUID, taking care of it.
+		// We match on partial-UUID (20bytes + size).
+		if machineInfos.BlockStorageType == machine.BsVirtioBlk {
+			virtioBlkUuidMask := uuid.UUID{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xf0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
+
+			for i := 8; i < 16; i++ {
+				volUuid[i] &= virtioBlkUuidMask[i]
+			}
+
+			slog.Debug(
+				"Openstack truncated uuid",
+				slog.String("uuid", volUuid.String()),
+			)
+		}
+
 		blockStorages[volUuid] = &BlockStorageInfos{
 			Uuid:      volUuid,
-			FullUuid:  volUuid,
+			FullUuid:  realUuid,
 			MachineId: openstackMachineUuid,
 			Size:      vol.Size, // Openstack returns directly in Gi
 			Device:    device,

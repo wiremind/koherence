@@ -43,7 +43,7 @@ func bsCheckerCommand(clicontext *cli.Context) error {
 
 	switch machineInfos.SysVendor {
 	case machine.ProviderOpenstack:
-		bsProvider, err = bs.OpenstackGetBlockStorage(machineInfos.Uuid)
+		bsProvider, err = bs.OpenstackGetBlockStorage(machineInfos)
 		if err != nil {
 			return err
 		}
