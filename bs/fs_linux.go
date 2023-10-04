@@ -44,7 +44,14 @@ func commonDeviceSize(pseudoFsDevPath string) int {
 		return 0
 	}
 
-	return ret
+	/*
+	 * XXX in linux size is stored in 512bytes sector, see:
+	 * - https://unix.stackexchange.com/questions/512945/what-units-are-the-values-in-proc-partitions-and-sys-dev-block-block-size/512959#512959
+	 * - https://unix.stackexchange.com/questions/555838/calculate-disk-byte-size-exclusively-from-sys-block
+	 *
+	 * We want to return in Gi unit so : * 512 / 1024 / 1024 / 1024 <=> >> 21
+	 */
+	return ret >> 21
 }
 
 func commonDeviceBlockDev(pseudoFsDevPath string) ([]byte, error) {
@@ -157,7 +164,7 @@ func virtioBlkDeviceInfos(device string) (*BlockStorageInfos, error) {
 	}
 	infos.Device = device
 	infos.Type = machine.BsVirtioBlk
-	infos.Size = uint(commonDeviceSize(pseudoFsDevPath))
+	infos.Size = commonDeviceSize(pseudoFsDevPath)
 
 	blockDev, err := commonDeviceBlockDev(pseudoFsDevPath)
 	if err != nil {
@@ -270,7 +277,7 @@ func scsiDeviceInfos(device string) (*BlockStorageInfos, error) {
 	}
 	infos.Device = device
 	infos.Type = machine.BsSCSI
-	infos.Size = uint(commonDeviceSize(pseudoFsDevPath))
+	infos.Size = commonDeviceSize(pseudoFsDevPath)
 
 	blockDev, err := commonDeviceBlockDev(pseudoFsDevPath)
 	if err != nil {

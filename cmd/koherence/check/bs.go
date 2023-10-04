@@ -75,8 +75,7 @@ func bsCheckerCommand(clicontext *cli.Context) error {
 
 		// Check coherence...
 		// TODO check size too...
-		//if v.MachineId != p.MachineId || v.Device != filepath.Base(p.Device) || v.Size != p.Size {
-		if v.MachineId != p.MachineId || v.Device != filepath.Base(p.Device) {
+		if v.MachineId != p.MachineId || v.Device != filepath.Base(p.Device) || v.Size != p.Size {
 			bsDiff[v.Uuid] = &bsTuple{Fs: v, Provider: p}
 
 			slog.Debug(

@@ -11,7 +11,11 @@ import (
 	"github.com/wiremind/koherence/machine"
 )
 
-// XXX we only use environment variables method
+// XXX we only use environment variables method, needs:
+// OS_AUTH_URL, OS_DOMAIN_ID or OS_DOMAIN_NAME, OS_PROJECT_ID, OS_PROJECT_NAME,
+// OS_USERNAME, OS_PASSWORD, OS_REGION_NAME, OS_INTERFACE,
+// OS_IDENTITY_API_VERSION
+
 func openstackVolumesServiceAuth() (*gophercloud.ServiceClient, error) {
 	opts, err := openstack.AuthOptionsFromEnv()
 	if err != nil {
@@ -124,7 +128,7 @@ func OpenstackGetBlockStorage(machineUuid uuid.UUID) (map[uuid.UUID]*BlockStorag
 			Uuid:      volUuid,
 			FullUuid:  volUuid,
 			MachineId: openstackMachineUuid,
-			Size:      uint(vol.Size),
+			Size:      vol.Size, // Openstack returns directly in Gi
 			Device:    device,
 			Type:      machine.BsUnknown,
 			BlockDev:  "unknown",
