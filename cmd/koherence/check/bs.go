@@ -70,7 +70,9 @@ func bsCheckerCommand(clicontext *cli.Context) error {
 				"Volume not found on provider.",
 				slog.String("uuid", k.String()),
 			)
-			panic("Block-storage not found on provider API...")
+			// XXX Provider think it is detached but it is not... Just create
+			// an empty struct to be stored in bsDiff
+			p = &bs.BlockStorageInfos{}
 		}
 
 		// Check coherence...
