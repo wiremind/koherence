@@ -14,13 +14,11 @@ WORKDIR $GOPATH/src/github.com/wiremind/koherence
 
 COPY . .
 
-RUN make koherence \
-	&& mv koherence /usr/bin/
+RUN make koherence && mv koherence /usr/bin/
 
-FROM scratch as runtime
+FROM busybox:stable as runtime
 
 COPY --from=build /usr/bin/koherence /koherence
-
 COPY --from=build /usr/bin/jq /jq
 
 ENTRYPOINT ["/koherence"]
