@@ -1,85 +1,120 @@
-name: release
+name: Build
+
 on:
   push:
+    branches:
+      - main
     tags:
-    - 'v*.*.*'
-jobs:
-  release:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
-    environment: release
-    steps:
-    - name: Checkout
-      uses: actions/checkout@master
-      with:
-        fetch-depth: 0 # get all tags, needed to get git log
-        ref: main
-    - name: Setup Go
-      uses: actions/setup-go@v1
-      with:
-        go-version: '1.21.1'
-    - name: Prepare
-      run: |
-        sudo apt-get update
-        sudo apt-get upgrade -y
-        sudo apt install -y make
-    - name: Build
-      env:
-        GOOS: linux
-        GOARCH: amd64
-      run: make koherence
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: koherence-${{env.GOOS}}-${{env.GOARCH}}
-        path: koherence
-        if-no-files-found: error
-    - name: Upload release
-      env:
-        TAG_NAME: ${{ github.ref_name }}
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        sha256sum koherence-* | sed 's| .*/|  |' > sha256sum.txt
-        gh release create "$TAG_NAME" --draft --title "KOherence ${TAG_NAME#jq-}" --generate-notes
-        gh release upload "$TAG_NAME" --clobber koherence-* sha256sum.txt
+      - 'v*.*.*'
+  pull_request:
+    branches:
+      - main
 
-  docker:
-    runs-on: ubuntu-latest
-    permissions:
-      packages: write
-    needs: release
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  BINARY_NAME: koherence
+
+jobs:
+  golang:
+    name: Golang
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-22.04
+        include:
+          - os: ubuntu-22.04
+            platform: linux
+            arch: amd64
     steps:
-      - name: Clone repository
+      - name: Checkout
         uses: actions/checkout@v4
-      - name: Download executables
-        uses: actions/download-artifact@v3
+
+      - name: Setup Go
+        uses: actions/setup-go@v4
         with:
-          name: koherence-linux-amd64
-      - name: Docker metadata
+          go-version: '1.21.2'
+
+      - name: Install packages
+        run: |
+          sudo apt-get update
+          sudo apt install -yq --no-install-recommends make
+
+      - name: Build
+        env:
+          GOOS: ${{ matrix.platform }}
+          GOARCH: ${{ matrix.arch }}
+        run: make build
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.BINARY_NAME }}-${{ matrix.platform }}-${{ matrix.arch }}
+          path: ${{ env.BINARY_NAME }}
+          if-no-files-found: error
+
+  container:
+    name: Containerfile
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-22.04
+        include:
+          - os: ubuntu-22.04
+            platform: linux
+            arch: amd64
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
         uses: docker/metadata-action@v5
         id: metadata
         with:
-          images: ghcr.io/${{ github.repository }}
-          tags: type=match,pattern=koherence-(.*),group=1,value=${{ github.ref_name }}
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and release Docker image
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      - name: Build image
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./Containerfile
-          push: true
-          provenance: false
-          platforms: linux/amd64
+          file: Containerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          platforms: ${{ matrix.platform }}/${{ matrix.arch }}
           tags: ${{ steps.metadata.outputs.tags }}
           labels: ${{ steps.metadata.outputs.labels }}
+
+  release:
+    runs-on: ubuntu-22.04
+    if: startsWith(github.ref, 'refs/tags/')
+    needs:
+      - golang
+      - container
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+
+      - name: Upload release
+        env:
+          TAG_NAME: ${{ github.ref_name }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          sha256sum ${{ env.BINARY_NAME }}-* | sed 's| .*/|  |' > sha256sum.txt
+          gh release create "$TAG_NAME" --draft --title "${{ env.BINARY_NAME }} ${TAG_NAME#jq-}" --generate-notes
+          gh release upload "$TAG_NAME" --clobber ${{ env.BINARY_NAME }}-* sha256sum.txt

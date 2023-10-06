@@ -76,7 +76,7 @@ func fetchMetadataJson() (*openstackMetadata, error) {
 	if err = json.NewDecoder(resp.Body).Decode(&metadatas); err != nil {
 		slog.Error(
 			"Error when decoding Openstack metadata json.",
-			//slog.String("json", string(b)),
+			// slog.String("json", string(b)),
 			slog.String("error", err.Error()),
 		)
 		return nil, err
@@ -92,7 +92,6 @@ func fetchMetadataJson() (*openstackMetadata, error) {
 
 func ReadOpenstackInfos() (*MachineInfos, error) {
 	metadatas, err := fetchMetadataJson()
-
 	if err != nil {
 		panic(err)
 	}

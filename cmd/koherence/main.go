@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/urfave/cli"
@@ -18,5 +19,9 @@ func main() {
 		checkCommand,
 	}
 
-	app.Run(os.Args)
+	err := app.Run(os.Args)
+	if err != nil {
+		// TODO do better
+		panic(fmt.Sprintf("main: %s", err))
+	}
 }

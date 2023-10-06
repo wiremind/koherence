@@ -37,7 +37,6 @@ const (
 
 func readFsPath(path string) ([]byte, error) {
 	buf, err := os.ReadFile(path)
-
 	if err != nil {
 		slog.Error(
 			"Error reading file",

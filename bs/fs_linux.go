@@ -6,6 +6,7 @@ package bs
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -312,7 +313,7 @@ func listDevices(bsType string) []string {
 	}
 
 	walk := func(fn string, fi os.FileInfo, err error) error {
-		if re.MatchString(fn) == false {
+		if !re.MatchString(fn) {
 			return nil
 		}
 
@@ -322,7 +323,11 @@ func listDevices(bsType string) []string {
 		return nil
 	}
 
-	filepath.Walk(sysBlock, walk)
+	err := filepath.Walk(sysBlock, walk)
+	if err != nil {
+		// TODO do better
+		panic(fmt.Sprintf("listDevices: %s", err))
+	}
 
 	return files
 }
@@ -349,7 +354,7 @@ func ExtractBsInfos(m *machine.MachineInfos) map[uuid.UUID]*BlockStorageInfos {
 		i, err := fn(dev)
 		if err != nil {
 			// TODO do better
-			panic("aaahh")
+			panic(fmt.Sprintf("ExtractBsInfos: %s", err))
 		}
 
 		// Add machine UUID
