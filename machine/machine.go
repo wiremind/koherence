@@ -7,14 +7,14 @@ import (
 // Block Storage type enum
 const (
 	BsUnknown   string = "unknown"
-	BsSCSI             = "scsi"
-	BsVirtioBlk        = "virtio_blk"
+	BsSCSI      string = "scsi"
+	BsVirtioBlk string = "virtio_blk"
 )
 
 // Provider Enum
 const (
 	ProviderUnknown   string = "Unknown"
-	ProviderOpenstack        = "OpenStack Foundation"
+	ProviderOpenstack string = "OpenStack Foundation"
 )
 
 type MachineInfos struct {
