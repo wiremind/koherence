@@ -16,9 +16,10 @@ COPY . .
 
 RUN make koherence && mv koherence /usr/bin/
 
+
 FROM busybox:stable as runtime
 
-COPY --from=build /usr/bin/koherence /koherence
-COPY --from=build /usr/bin/jq /jq
+COPY --from=build /usr/bin/koherence /usr/bin/koherence
+COPY --from=build /usr/bin/jq /usr/bin/jq
 
-ENTRYPOINT ["/koherence"]
+ENTRYPOINT ["/usr/bin/koherence"]
