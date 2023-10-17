@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log/slog"
 	"os"
 
 	"github.com/urfave/cli"
@@ -21,7 +21,10 @@ func main() {
 
 	err := app.Run(os.Args)
 	if err != nil {
-		// TODO do better
-		panic(fmt.Sprintf("main: %s", err))
+		slog.Error(
+			"main() error",
+			slog.String("error", err.Error()),
+		)
+		os.Exit(1)
 	}
 }
