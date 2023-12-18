@@ -49,7 +49,7 @@ jobs:
         run: make build
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ env.BINARY_NAME }}-${{ matrix.platform }}-${{ matrix.arch }}
           path: ${{ env.BINARY_NAME }}
