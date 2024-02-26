@@ -9,10 +9,21 @@ import (
 )
 
 func main() {
+	var exitValue int
+
 	app := cli.NewApp()
 	app.Name = "koherence"
 	app.Usage = "Openstack/Kube/Machine coherence checker"
 	app.Version = version.Version
+
+	app.Flags = []cli.Flag{
+		cli.IntFlag{
+			Name:        "exit, e",
+			Value:       1,
+			Usage:       "value returned on error",
+			Destination: &exitValue,
+		},
+	}
 
 	app.Commands = []cli.Command{
 		debugCommand,
@@ -25,6 +36,6 @@ func main() {
 			"main() error",
 			slog.String("error", err.Error()),
 		)
-		os.Exit(1)
+		os.Exit(exitValue)
 	}
 }
