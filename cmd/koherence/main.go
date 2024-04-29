@@ -28,6 +28,7 @@ func main() {
 	app.Commands = []cli.Command{
 		debugCommand,
 		checkCommand,
+		serveCommand,
 	}
 
 	err := app.Run(os.Args)

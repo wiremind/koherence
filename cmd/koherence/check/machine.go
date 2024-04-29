@@ -1,6 +1,7 @@
 package check
 
 import (
+	"errors"
 	"log/slog"
 
 	"github.com/urfave/cli"
@@ -46,7 +47,8 @@ func MachineChecker() (*machine.MachineInfos, error) {
 			"This provider is not supported.",
 			slog.String("provider", infosFs.SysVendor),
 		)
-		panic("provider not supported")
+		err = errors.New("provider not supported")
+		return nil, err
 	}
 
 	if infosFs.Uuid != infosProvider.Uuid || infosFs.Hostname != infosProvider.Hostname {
@@ -55,7 +57,8 @@ func MachineChecker() (*machine.MachineInfos, error) {
 			slog.Any("fs", *infosFs),
 			slog.Any("provider", *infosProvider),
 		)
-		panic("Machine informations mismatch.")
+		err = errors.New("machine informations mismatch")
+		return nil, err
 	}
 
 	return infosFs, nil
