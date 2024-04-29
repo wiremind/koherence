@@ -30,7 +30,8 @@ ${BINARY_NAME}: ${KOHERENCE_FILES}
 	strip -x $@
 
 ## Lints all the go code in the application.
-lint:
+.PHONY: lint
+lint: dependencies
 	gofmt -w $(GOFMT_FILES)
 	$(GOBIN)/goimports -w $(GOFMT_FILES)
 	$(GOBIN)/gofumpt -l -w $(GOFMT_FILES)
@@ -38,10 +39,11 @@ lint:
 	$(GOBIN)/golangci-lint run
 
 ## Loads all the dependencies to vendor directory
+.PHONY: dependencies
 dependencies:
-	go install golang.org/x/tools/cmd/goimports@v0.13.0
-	go install mvdan.cc/gofumpt@v0.5.0
-	go install github.com/daixiang0/gci@v0.11.2
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.54.2
+	go install golang.org/x/tools/cmd/goimports@v0.20.0
+	go install mvdan.cc/gofumpt@v0.6.0
+	go install github.com/daixiang0/gci@v0.13.4
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.57.2
 	go mod vendor
 	go mod tidy
