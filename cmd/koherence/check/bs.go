@@ -2,6 +2,7 @@ package check
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log/slog"
 	"os"
@@ -30,33 +31,27 @@ var BlockStorageCommand = cli.Command{
 	Action: bsCheckerCommand,
 }
 
-func bsCheckerCommand(clicontext *cli.Context) error {
-	var bsProvider map[uuid.UUID]*bs.BlockStorageInfos
-	var err error
-
-	machineInfos, err := MachineChecker()
-	if err != nil {
-		return err
-	}
-
-	bsFs := bs.ExtractBsInfos(machineInfos)
+func GetBsProvider(machineInfos *machine.MachineInfos) (map[uuid.UUID]*bs.BlockStorageInfos, error) {
 
 	switch machineInfos.SysVendor {
 	case machine.ProviderOpenstack:
-		bsProvider, err = bs.OpenstackGetBlockStorage(machineInfos)
-		if err != nil {
-			return err
-		}
+		return bs.OpenstackGetBlockStorage(machineInfos)
 	default:
 		slog.Error(
 			"Provider not supported.",
 			slog.String("provider", machineInfos.SysVendor),
 		)
-		panic("Provider not supported.")
+		err := errors.New("provider not supported")
+		return nil, err
 	}
+}
+
+func BsMerge(bsFs map[uuid.UUID]*bs.BlockStorageInfos, bsProvider map[uuid.UUID]*bs.BlockStorageInfos) ([]byte, error) {
+	var b []byte
+	var err error
 
 	bsDiff := map[uuid.UUID]*bsTuple{}
-	bsMerged := map[uuid.UUID]*bs.BlockStorageInfos{}
+	BsMerged := map[uuid.UUID]*bs.BlockStorageInfos{}
 
 	for k, v := range bsFs {
 		// Ignore boot block-storage
@@ -86,7 +81,7 @@ func bsCheckerCommand(clicontext *cli.Context) error {
 				slog.Any("provider", *p),
 			)
 		} else {
-			bsMerged[v.Uuid] = &bs.BlockStorageInfos{
+			BsMerged[v.Uuid] = &bs.BlockStorageInfos{
 				Uuid:      v.Uuid,
 				FullUuid:  p.FullUuid,
 				MachineId: v.MachineId,
@@ -100,20 +95,40 @@ func bsCheckerCommand(clicontext *cli.Context) error {
 		}
 	}
 
-	var b []byte
-
-	all := map[string]interface{}{"merged": bsMerged, "diff": bsDiff}
+	all := map[string]interface{}{"merged": BsMerged, "diff": bsDiff}
 	b, err = json.Marshal(all)
 	if err != nil {
 		slog.Error("Cannot encode in JSON")
+		return nil, err
+	}
+
+	if len(bsDiff) > 0 {
+		return b, &IncoherenceError{}
+	}
+
+	return b, nil
+}
+
+func bsCheckerCommand(clicontext *cli.Context) error {
+	var err error
+
+	machineInfos, err := MachineChecker()
+	if err != nil {
 		return err
 	}
 
-	fmt.Fprintln(os.Stdout, string(b))
+	bsFs := bs.ExtractBsInfos(machineInfos)
 
-	if len(bsDiff) > 0 {
-		return &IncoherenceError{}
+	bsProvider, err := GetBsProvider(machineInfos)
+	if err != nil {
+		return err
 	}
 
-	return nil
+	b, err := BsMerge(bsFs, bsProvider)
+
+	if b != nil {
+		fmt.Fprintln(os.Stdout, string(b))
+	}
+
+	return err
 }
