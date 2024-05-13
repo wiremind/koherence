@@ -32,7 +32,6 @@ var BlockStorageCommand = cli.Command{
 }
 
 func GetBsProvider(machineInfos *machine.MachineInfos) (map[uuid.UUID]*bs.BlockStorageInfos, error) {
-
 	switch machineInfos.SysVendor {
 	case machine.ProviderOpenstack:
 		return bs.OpenstackGetBlockStorage(machineInfos)
