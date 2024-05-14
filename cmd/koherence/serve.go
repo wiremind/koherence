@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/http"
 
 	"github.com/urfave/cli"
@@ -151,5 +152,6 @@ func serveAllCommand(clicontext *cli.Context) error {
 	http.HandleFunc("/debug/openstack", debugOpenstackHandler)
 	http.HandleFunc("/check/bs", checkBsHandler)
 	http.HandleFunc("/check/machine", checkMachineHandler)
+	slog.Info("listen port :8080")
 	return http.ListenAndServe(":8080", nil)
 }
