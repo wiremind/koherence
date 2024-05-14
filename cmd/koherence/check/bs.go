@@ -21,6 +21,21 @@ type bsTuple struct {
 
 type IncoherenceError struct{}
 
+type All struct {
+	Merged Merged `json:"merged"`
+	Diff   Diff   `json:"diff"`
+}
+
+type Merged struct {
+	Count int                     `json:"count"`
+	Data  []*bs.BlockStorageInfos `json:"data"`
+}
+
+type Diff struct {
+	Count int        `json:"count"`
+	Data  []*bsTuple `json:"data"`
+}
+
 func (e *IncoherenceError) Error() string {
 	return "Incoherence found on the machine !"
 }
@@ -94,7 +109,26 @@ func BsMerge(bsFs map[uuid.UUID]*bs.BlockStorageInfos, bsProvider map[uuid.UUID]
 		}
 	}
 
-	all := map[string]interface{}{"merged": BsMerged, "diff": bsDiff}
+	merged := make([]*bs.BlockStorageInfos, 0, len(BsMerged))
+	for _, value := range BsMerged {
+		merged = append(merged, value)
+	}
+	diff := make([]*bsTuple, 0, len(bsDiff))
+	for _, value := range bsDiff {
+		diff = append(diff, value)
+	}
+
+	all := All{
+		Merged: Merged{
+			Count: len(BsMerged),
+			Data:  merged,
+		},
+		Diff: Diff{
+			Count: len(bsDiff),
+			Data:  diff,
+		},
+	}
+
 	b, err = json.Marshal(all)
 	if err != nil {
 		slog.Error("Cannot encode in JSON")
