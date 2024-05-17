@@ -88,13 +88,13 @@ func OpenstackGetBlockStorage(machineInfos *machine.MachineInfos) (map[uuid.UUID
 	// TODO goroutine ?
 	for _, vol := range allVolumes {
 		if vol.Multiattach || len(vol.Attachments) > 1 {
-			slog.Error(
+			slog.Warn(
 				"Detected multi-attach for a volume.",
 				slog.String("volumeID", vol.ID),
 				slog.Any("attachments", vol.Attachments),
 			)
 			// TODO do better
-			panic("multiattach")
+			continue
 		}
 
 		volUuid, err := uuid.Parse(vol.ID)
