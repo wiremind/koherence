@@ -144,6 +144,24 @@ func checkMachineHandler(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
+func checkOpenstackMultiattachHandler(w http.ResponseWriter, req *http.Request) {
+	multiAttachments, err := bs.OpenstackGetMultiAttachments()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	b, err := json.Marshal(multiAttachments)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintln(w, string(b))
+}
+
 func serveAllCommand(clicontext *cli.Context) error {
 	http.HandleFunc("/ping", pingHandler)
 	http.HandleFunc("/debug/bs", debugBsHandler)
@@ -152,6 +170,7 @@ func serveAllCommand(clicontext *cli.Context) error {
 	http.HandleFunc("/debug/openstack", debugOpenstackHandler)
 	http.HandleFunc("/check/bs", checkBsHandler)
 	http.HandleFunc("/check/machine", checkMachineHandler)
+	http.HandleFunc("/check/openstack/multiattach", checkOpenstackMultiattachHandler)
 	slog.Info("listen port :8080")
 	return http.ListenAndServe(":8080", nil)
 }
