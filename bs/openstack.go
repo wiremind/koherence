@@ -49,9 +49,21 @@ func openstackVolumesServiceAuth() (*gophercloud.ServiceClient, error) {
 	return client, nil
 }
 
-func OpenstackGetBlockStorage(machineInfos *machine.MachineInfos) (map[uuid.UUID]*BlockStorageInfos, error) {
-	var openstackMachineUuid uuid.UUID
-	var device string
+type MultiAttachments struct {
+	MultiAttach MultiAttach `json:"multi-attach"`
+}
+
+type MultiAttach struct {
+	Count int               `json:"count"`
+	Data  []OpenstackAttach `json:"data"`
+}
+
+type OpenstackAttach struct {
+	Uuid        string               `json:"uuid"`
+	Attachments []volumes.Attachment `json:"attachments"`
+}
+
+func openstackAllVolumes() ([]volumes.Volume, error) {
 	var err error
 
 	client, err := openstackVolumesServiceAuth()
@@ -80,6 +92,49 @@ func OpenstackGetBlockStorage(machineInfos *machine.MachineInfos) (map[uuid.UUID
 			"Error during volumes.ExtractVolumes().",
 			slog.String("error", err.Error()),
 		)
+		return nil, err
+	}
+
+	return allVolumes, nil
+}
+
+func OpenstackGetMultiAttachments() (*MultiAttachments, error) {
+	var err error
+
+	allVolumes, err := openstackAllVolumes()
+	if err != nil {
+		return nil, err
+	}
+
+	attachments := []OpenstackAttach{}
+
+	for _, vol := range allVolumes {
+		if vol.Multiattach || len(vol.Attachments) > 1 {
+			attachment := OpenstackAttach{
+				Uuid:        vol.ID,
+				Attachments: vol.Attachments,
+			}
+			attachments = append(attachments, attachment)
+		}
+	}
+
+	multiAttachments := MultiAttachments{
+		MultiAttach: MultiAttach{
+			Count: len(attachments),
+			Data:  attachments,
+		},
+	}
+
+	return &multiAttachments, nil
+}
+
+func OpenstackGetBlockStorage(machineInfos *machine.MachineInfos) (map[uuid.UUID]*BlockStorageInfos, error) {
+	var openstackMachineUuid uuid.UUID
+	var device string
+	var err error
+
+	allVolumes, err := openstackAllVolumes()
+	if err != nil {
 		return nil, err
 	}
 
