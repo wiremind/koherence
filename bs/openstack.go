@@ -59,8 +59,11 @@ type MultiAttach struct {
 }
 
 type OpenstackAttach struct {
-	Uuid        string               `json:"uuid"`
-	Attachments []volumes.Attachment `json:"attachments"`
+	AttachmentId string `json:"attachment_id"`
+	Device       string `json:"device"`
+	HostName     string `json:"host_name"`
+	ServerId     string `json:"server_id"`
+	VolumeId     string `json:"volume_id"`
 }
 
 func openstackAllVolumes() ([]volumes.Volume, error) {
@@ -110,11 +113,16 @@ func OpenstackGetMultiAttachments() (*MultiAttachments, error) {
 
 	for _, vol := range allVolumes {
 		if vol.Multiattach || len(vol.Attachments) > 1 {
-			attachment := OpenstackAttach{
-				Uuid:        vol.ID,
-				Attachments: vol.Attachments,
+			for _, attachment := range vol.Attachments {
+				openstack_attach := OpenstackAttach{
+					AttachmentId: attachment.AttachmentID,
+					Device:       attachment.Device,
+					HostName:     attachment.HostName,
+					ServerId:     attachment.ServerID,
+					VolumeId:     attachment.VolumeID,
+				}
+				attachments = append(attachments, openstack_attach)
 			}
-			attachments = append(attachments, attachment)
 		}
 	}
 
