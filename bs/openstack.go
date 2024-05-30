@@ -101,7 +101,7 @@ func openstackAllVolumes() ([]volumes.Volume, error) {
 	return allVolumes, nil
 }
 
-func OpenstackGetMultiAttachments() (*MultiAttachments, error) {
+func OpenstackGetMultiAttachments(machineInfos *machine.MachineInfos) (*MultiAttachments, error) {
 	var err error
 
 	allVolumes, err := openstackAllVolumes()
@@ -114,14 +114,16 @@ func OpenstackGetMultiAttachments() (*MultiAttachments, error) {
 	for _, vol := range allVolumes {
 		if vol.Multiattach || len(vol.Attachments) > 1 {
 			for _, attachment := range vol.Attachments {
-				openstack_attach := OpenstackAttach{
-					AttachmentId: attachment.AttachmentID,
-					Device:       attachment.Device,
-					HostName:     attachment.HostName,
-					ServerId:     attachment.ServerID,
-					VolumeId:     attachment.VolumeID,
+				if attachment.ServerID == machineInfos.Uuid.String() {
+					openstack_attach := OpenstackAttach{
+						AttachmentId: attachment.AttachmentID,
+						Device:       attachment.Device,
+						HostName:     attachment.HostName,
+						ServerId:     attachment.ServerID,
+						VolumeId:     attachment.VolumeID,
+					}
+					attachments = append(attachments, openstack_attach)
 				}
-				attachments = append(attachments, openstack_attach)
 			}
 		}
 	}
