@@ -145,7 +145,15 @@ func checkMachineHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func checkOpenstackMultiattachHandler(w http.ResponseWriter, req *http.Request) {
-	multiAttachments, err := bs.OpenstackGetMultiAttachments()
+	var err error
+
+	machineInfos, err := check.MachineChecker()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	multiAttachments, err := bs.OpenstackGetMultiAttachments(machineInfos)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
