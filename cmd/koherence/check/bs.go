@@ -22,8 +22,9 @@ type bsTuple struct {
 type IncoherenceError struct{}
 
 type All struct {
-	Merged Merged `json:"merged"`
-	Diff   Diff   `json:"diff"`
+	NodeName string `json:"node_name"`
+	Merged   Merged `json:"merged"`
+	Diff     Diff   `json:"diff"`
 }
 
 type Merged struct {
@@ -60,7 +61,7 @@ func GetBsProvider(machineInfos *machine.MachineInfos) (map[uuid.UUID]*bs.BlockS
 	}
 }
 
-func BsMerge(bsFs map[uuid.UUID]*bs.BlockStorageInfos, bsProvider map[uuid.UUID]*bs.BlockStorageInfos) ([]byte, error) {
+func BsMerge(machineInfos *machine.MachineInfos, bsFs map[uuid.UUID]*bs.BlockStorageInfos, bsProvider map[uuid.UUID]*bs.BlockStorageInfos) ([]byte, error) {
 	var b []byte
 	var err error
 
@@ -104,6 +105,7 @@ func BsMerge(bsFs map[uuid.UUID]*bs.BlockStorageInfos, bsProvider map[uuid.UUID]
 				Type:      v.Type,
 				BlockDev:  v.BlockDev,
 				Status:    p.Status,
+				NodeName:  v.NodeName,
 				Metadata:  p.Metadata,
 			}
 		}
@@ -119,6 +121,7 @@ func BsMerge(bsFs map[uuid.UUID]*bs.BlockStorageInfos, bsProvider map[uuid.UUID]
 	}
 
 	all := All{
+		NodeName: machineInfos.KubeNodeName,
 		Merged: Merged{
 			Count: len(BsMerged),
 			Data:  merged,
@@ -157,7 +160,7 @@ func bsCheckerCommand(clicontext *cli.Context) error {
 		return err
 	}
 
-	b, err := BsMerge(bsFs, bsProvider)
+	b, err := BsMerge(machineInfos, bsFs, bsProvider)
 
 	if b != nil {
 		fmt.Fprintln(os.Stdout, string(b))

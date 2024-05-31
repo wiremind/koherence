@@ -128,7 +128,7 @@ func checkBsHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	b, _ := check.BsMerge(bsFs, bsProvider)
+	b, _ := check.BsMerge(machineInfos, bsFs, bsProvider)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)

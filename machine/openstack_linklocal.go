@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/google/uuid"
@@ -103,5 +104,6 @@ func ReadOpenstackInfos() (*MachineInfos, error) {
 		SysVendor:        ProviderOpenstack,
 		ChassisVendor:    "QEMU",
 		BlockStorageType: "None",
+		KubeNodeName:     os.Getenv("KUBE_NODE_NAME"),
 	}, nil
 }

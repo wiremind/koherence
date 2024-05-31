@@ -13,5 +13,6 @@ type BlockStorageInfos struct {
 	Type      string            `json:"type"`
 	BlockDev  string            `json:"block_dev"`
 	Status    string            `json:"status"`
+	NodeName  string            `json:"node_name"`
 	Metadata  map[string]string `json:"metadata"`
 }

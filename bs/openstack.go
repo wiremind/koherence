@@ -50,6 +50,7 @@ func openstackVolumesServiceAuth() (*gophercloud.ServiceClient, error) {
 }
 
 type MultiAttachments struct {
+	NodeName    string      `json:"node_name"`
 	MultiAttach MultiAttach `json:"multi-attach"`
 }
 
@@ -64,6 +65,7 @@ type OpenstackAttach struct {
 	HostName     string `json:"host_name"`
 	ServerId     string `json:"server_id"`
 	VolumeId     string `json:"volume_id"`
+	NodeName     string `json:"node_name"`
 }
 
 func openstackAllVolumes() ([]volumes.Volume, error) {
@@ -121,6 +123,7 @@ func OpenstackGetMultiAttachments(machineInfos *machine.MachineInfos) (*MultiAtt
 						HostName:     attachment.HostName,
 						ServerId:     attachment.ServerID,
 						VolumeId:     attachment.VolumeID,
+						NodeName:     machineInfos.KubeNodeName,
 					}
 					attachments = append(attachments, openstack_attach)
 				}
@@ -129,6 +132,7 @@ func OpenstackGetMultiAttachments(machineInfos *machine.MachineInfos) (*MultiAtt
 	}
 
 	multiAttachments := MultiAttachments{
+		NodeName: machineInfos.KubeNodeName,
 		MultiAttach: MultiAttach{
 			Count: len(attachments),
 			Data:  attachments,
@@ -214,6 +218,7 @@ func OpenstackGetBlockStorage(machineInfos *machine.MachineInfos) (map[uuid.UUID
 			Type:      machine.BsUnknown,
 			BlockDev:  "unknown",
 			Status:    vol.Status,
+			NodeName:  machineInfos.KubeNodeName,
 			Metadata:  vol.Metadata,
 		}
 	}

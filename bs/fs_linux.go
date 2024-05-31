@@ -359,6 +359,9 @@ func ExtractBsInfos(m *machine.MachineInfos) map[uuid.UUID]*BlockStorageInfos {
 
 		// Add machine UUID
 		i.MachineId = m.Uuid
+
+		// Add machine node name
+		i.NodeName = m.KubeNodeName
 		infos[i.Uuid] = i
 	}
 
