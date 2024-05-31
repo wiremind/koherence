@@ -23,4 +23,5 @@ type MachineInfos struct {
 	SysVendor        string    `json:"sys_vendor"`
 	ChassisVendor    string    `json:"chassis_vendor"`
 	BlockStorageType string    `json:"block_storage_type"`
+	KubeNodeName     string    `json:"node_name"`
 }

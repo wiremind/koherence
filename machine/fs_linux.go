@@ -105,5 +105,6 @@ func ReadFsInfos() (*MachineInfos, error) {
 		SysVendor:        string(sysVendor),
 		ChassisVendor:    string(chassisVendor),
 		BlockStorageType: getBSType(),
+		KubeNodeName:     os.Getenv("KUBE_NODE_NAME"),
 	}, nil
 }
