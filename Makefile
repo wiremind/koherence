@@ -41,9 +41,9 @@ lint: dependencies
 ## Loads all the dependencies to vendor directory
 .PHONY: dependencies
 dependencies:
-	go install golang.org/x/tools/cmd/goimports@v0.20.0
-	go install mvdan.cc/gofumpt@v0.6.0
-	go install github.com/daixiang0/gci@v0.13.4
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.58.1
+	go install golang.org/x/tools/cmd/goimports@v0.31
+	go install mvdan.cc/gofumpt@v0.7
+	go install github.com/daixiang0/gci@v0.13
+	go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2
 	go mod vendor
 	go mod tidy

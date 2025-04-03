@@ -33,7 +33,9 @@ func debugBs(clicontext *cli.Context) error {
 		return err
 	}
 
-	fmt.Fprintln(os.Stdout, string(b))
+	if _, err := fmt.Fprintln(os.Stdout, string(b)); err != nil {
+		slog.Error("failed to write to stdout", "err", err)
+	}
 
 	return nil
 }

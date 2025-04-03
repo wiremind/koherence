@@ -20,7 +20,9 @@ var serveCommand = cli.Command{
 
 func pingHandler(w http.ResponseWriter, req *http.Request) {
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintln(w, "pong")
+	if _, err := fmt.Fprintln(w, "pong"); err != nil {
+		slog.Error("failed to write to http.ResponseWriter", "err", err)
+	}
 }
 
 func debugBsHandler(w http.ResponseWriter, req *http.Request) {
@@ -42,7 +44,9 @@ func debugBsHandler(w http.ResponseWriter, req *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintln(w, string(b))
+	if _, err := fmt.Fprintln(w, string(b)); err != nil {
+		slog.Error("failed to write to http.ResponseWriter", "err", err)
+	}
 }
 
 func debugMachineFsHandler(w http.ResponseWriter, req *http.Request) {
@@ -63,7 +67,9 @@ func debugMachineFsHandler(w http.ResponseWriter, req *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintln(w, string(b))
+	if _, err := fmt.Fprintln(w, string(b)); err != nil {
+		slog.Error("failed to write to http.ResponseWriter", "err", err)
+	}
 }
 
 func debugMachineOpenstackHandler(w http.ResponseWriter, req *http.Request) {
@@ -84,7 +90,9 @@ func debugMachineOpenstackHandler(w http.ResponseWriter, req *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintln(w, string(b))
+	if _, err := fmt.Fprintln(w, string(b)); err != nil {
+		slog.Error("failed to write to http.ResponseWriter", "err", err)
+	}
 }
 
 func debugOpenstackHandler(w http.ResponseWriter, req *http.Request) {
@@ -108,7 +116,9 @@ func debugOpenstackHandler(w http.ResponseWriter, req *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintln(w, string(b))
+	if _, err := fmt.Fprintln(w, string(b)); err != nil {
+		slog.Error("failed to write to http.ResponseWriter", "err", err)
+	}
 }
 
 func checkBsHandler(w http.ResponseWriter, req *http.Request) {
@@ -132,7 +142,9 @@ func checkBsHandler(w http.ResponseWriter, req *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintln(w, string(b))
+	if _, err := fmt.Fprintln(w, string(b)); err != nil {
+		slog.Error("failed to write to http.ResponseWriter", "err", err)
+	}
 }
 
 func checkMachineHandler(w http.ResponseWriter, req *http.Request) {
@@ -167,7 +179,9 @@ func checkOpenstackMultiattachHandler(w http.ResponseWriter, req *http.Request) 
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintln(w, string(b))
+	if _, err := fmt.Fprintln(w, string(b)); err != nil {
+		slog.Error("failed to write to http.ResponseWriter", "err", err)
+	}
 }
 
 func serveAllCommand(clicontext *cli.Context) error {

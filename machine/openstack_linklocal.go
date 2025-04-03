@@ -72,7 +72,14 @@ func fetchMetadataJson() (*openstackMetadata, error) {
 		)
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			slog.Error(
+				"Error closing http response",
+				slog.String("error", err.Error()),
+			)
+		}
+	}()
 
 	if err = json.NewDecoder(resp.Body).Decode(&metadatas); err != nil {
 		slog.Error(
