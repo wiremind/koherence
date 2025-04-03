@@ -78,7 +78,14 @@ func virtioBlkDeviceCheck(pseudoFsDevPath string) bool {
 		)
 		return false
 	}
-	defer file.Close()
+	defer func() {
+		if err := file.Close(); err != nil {
+			slog.Error(
+				"Error closing file.",
+				slog.String("error", err.Error()),
+			)
+		}
+	}()
 
 	devtype := "None"
 	scanner := bufio.NewScanner(file)
@@ -117,7 +124,14 @@ func virtioBlkDeviceUuid(blockDev string) (uuid.UUID, error) {
 		)
 		panic("virtioBlkDeviceUuid")
 	}
-	defer file.Close()
+	defer func() {
+		if err := file.Close(); err != nil {
+			slog.Error(
+				"Error closing file.",
+				slog.String("error", err.Error()),
+			)
+		}
+	}()
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
@@ -194,7 +208,14 @@ func scsiDeviceCheck(pseudoFsDevPath string) bool {
 		)
 		return false
 	}
-	defer file.Close()
+	defer func() {
+		if err := file.Close(); err != nil {
+			slog.Error(
+				"Error closing file.",
+				slog.String("error", err.Error()),
+			)
+		}
+	}()
 
 	devtype := "None"
 	scanner := bufio.NewScanner(file)
@@ -233,7 +254,14 @@ func scsiDeviceUuid(blockDev string) (uuid.UUID, error) {
 		)
 		panic("scsiDeviceUuid")
 	}
-	defer file.Close()
+	defer func() {
+		if err := file.Close(); err != nil {
+			slog.Error(
+				"Error closing file.",
+				slog.String("error", err.Error()),
+			)
+		}
+	}()
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
